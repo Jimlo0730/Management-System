@@ -29,7 +29,7 @@
 <body>
   <div class="login-card">
     <h3 class="text-center mb-4 text-primary">System Login</h3>
-    <form onsubmit="login(event)">
+    <form onsubmit="handleLogin(event)">
       <div class="mb-3">
         <label class="form-label">Username</label>
         <input id="username" type="text" class="form-control" required placeholder="Enter username" />
@@ -51,57 +51,6 @@
     </form>
   </div>
 
-  <script>
-    // Default SuperAdmin account
-    const superAdminAccount = { 
-      username: "super1", 
-      password: "pass123", 
-      baseRole: "superadmin", 
-      permissions: ["all"] 
-    };
-
-    function login(event) {
-      event.preventDefault();
-
-      let username = document.getElementById("username").value.trim();
-      let password = document.getElementById("password").value.trim();
-      let selectedRole = document.getElementById("role").value;
-
-      // Get accounts from localStorage or start with SuperAdmin
-      let accounts = JSON.parse(localStorage.getItem("accounts")) || [superAdminAccount];
-
-      // Ensure SuperAdmin always exists
-      if (!accounts.some(acc => acc.username === superAdminAccount.username)) {
-        accounts.push(superAdminAccount);
-        localStorage.setItem("accounts", JSON.stringify(accounts));
-      }
-
-      // Find account
-      let account = accounts.find(acc => acc.username === username && acc.password === password);
-
-      if (!account) {
-        alert("Invalid username or password!");
-        return;
-      }
-
-      // Check if role matches the account baseRole
-      if (account.baseRole !== selectedRole) {
-        alert(`You are not allowed to log in as ${selectedRole}.`);
-        return;
-      }
-
-      // ✅ Save logged-in user
-      localStorage.setItem("loggedInUser", JSON.stringify(account));
-
-      // Redirect based on role
-      if (account.baseRole === "superadmin") {
-        window.location.href = "superadmin_dashboard.html";
-      } else if (account.baseRole === "admin") {
-        window.location.href = "admin_dashboard.html";
-      } else if (account.baseRole === "user") {
-        window.location.href = "user_dashboard.html";
-      }
-    }
-  </script>
+  <script src="accounts.js"></script>
 </body>
 </html>

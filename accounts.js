@@ -36,7 +36,7 @@ function handleLogin(e) {
     alert(`You are not allowed to log in as ${selectedRole}.`);
     return;
   }
-  
+
   localStorage.setItem("loggedInUser", account.username);
   localStorage.setItem("loggedInRole", selectedRole);
 
