@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Assign Roles & Permissions</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body { background-color: #f4f9fc; }
+    .container { margin-top: 80px; max-width: 700px; }
+    .card { border-radius: 1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-dark bg-dark">
+    <div class="container-fluid">
+      <span class="navbar-brand">Assign Roles & Permissions</span>
+      <button class="btn btn-outline-light" onclick="window.location.href='superadmin_dashboard.html'">Back</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="card p-4">
+      <form id="assignForm">
+        <div class="mb-3">
+          <label class="form-label">User</label>
+          <select id="userSelect" class="form-select"></select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Assign Role</label>
+          <select id="roleSelect" class="form-select">
+            <option value="admin">Admin</option>
+            <option value="user">User</option>
+          </select>
+        </div>
+        <label class="form-label">Permissions</label>
+        <div id="permissionsContainer"></div>
+        <button type="submit" class="btn btn-primary mt-3 w-100">Save</button>
+      </form>
+    </div>
+  </div>
+
+<script>
+const rolePermissions = {
+  user: [
+    { id: "time_in_out", label: "Time In / Out" },
+    { id: "view_tasks", label: "View Assigned Tasks" },
+    { id: "log_maintenance", label: "Submit Maintenance Findings" },
+    { id: "material_requests", label: "Submit Material Requests" },
+    { id: "team_evaluation", label: "Customer Team Evaluation" },
+    { id: "notifications", label: "Notifications" }
+  ],
+  admin: [
+    { id: "time_in_out", label: "Time In / Out" },
+    { id: "pending_approvals", label: "View Pending Approvals" },
+    { id: "maintenance_reminders", label: "View Maintenance Reminder" },
+    { id: "export_logs", label: "Export Logs" },
+    { id: "customer_reports", label: "View Customer Evaluation Reports" },
+    { id: "notifications", label: "Notifications" },
+    { id: "assign_task", label: "Assign Task to Employees" },
+    { id: "generate_reports", label: "Generate Reports" }
+  ]
+};
+
+// Render permissions checkboxes
+function renderPermissions(role, selectedPerms = []) {
+  const container = document.getElementById("permissionsContainer");
+  container.innerHTML = "";
+  rolePermissions[role].forEach(p => {
+    const div = document.createElement("div");
+    div.className = "form-check";
+    div.innerHTML = `
+      <input class="form-check-input" type="checkbox" id="${p.id}" ${selectedPerms.includes(p.id) ? "checked" : ""}>
+      <label class="form-check-label" for="${p.id}">${p.label}</label>
+    `;
+    container.appendChild(div);
+  });
+}
+
+window.onload = function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const newUser = urlParams.get("user");
+  const newRole = urlParams.get("role");
+
+  let accounts = JSON.parse(localStorage.getItem("accounts")) || [];
+  let userSelect = document.getElementById("userSelect");
+  userSelect.innerHTML = "";
+
+  let selectedAcc = null;
+  accounts.forEach(acc => {
+    // Always make sure account has permissions array
+    if (!acc.permissions) acc.permissions = [];
+    let opt = document.createElement("option");
+    opt.value = acc.username;
+    opt.textContent = acc.username;
+    if (acc.username === newUser) {
+      opt.selected = true;
+      selectedAcc = acc;
+    }
+    userSelect.appendChild(opt);
+  });
+
+  let roleSelect = document.getElementById("roleSelect");
+  if (newRole) roleSelect.value = newRole;
+
+  renderPermissions(roleSelect.value, selectedAcc?.permissions || []);
+
+  // re-render when role changes
+  roleSelect.addEventListener("change", () => {
+    renderPermissions(roleSelect.value, selectedAcc?.permissions || []);
+  });
+
+  // update permissions when switching users
+  userSelect.addEventListener("change", () => {
+    const acc = accounts.find(a => a.username === userSelect.value);
+    renderPermissions(roleSelect.value, acc?.permissions || []);
+  });
+};
+
+// Save changes
+document.getElementById("assignForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+  const username = document.getElementById("userSelect").value;
+  const role = document.getElementById("roleSelect").value;
+  let permissions = [];
+  document.querySelectorAll("#permissionsContainer .form-check-input:checked").forEach(cb => {
+    permissions.push(cb.id);
+  });
+
+  let accounts = JSON.parse(localStorage.getItem("accounts")) || [];
+  let account = accounts.find(acc => acc.username === username);
+  if (account) {
+    account.baseRole = role;
+    account.permissions = permissions || [];
+    localStorage.setItem("accounts", JSON.stringify(accounts));
+
+    alert(`Role & permissions updated for "${username}"`);
+  }
+});
+</script>
+</body>
+</html>

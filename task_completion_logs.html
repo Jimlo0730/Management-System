@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Task Completion Logs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: linear-gradient(to right, #e0f7fa, #fce4ec);
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .container {
+      margin-top: 60px;
+      max-width: 900px;
+    }
+    .card {
+      border-radius: 1rem;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
+    }
+    .badge {
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-dark bg-dark px-3">
+  <span class="navbar-brand">Task Completion Logs</span>
+  <div class="ms-auto d-flex gap-2">
+    <button class="btn btn-outline-light" onclick="history.back()">Back</button>
+    <button class="btn btn-outline-light" onclick="window.location.href='login.html'">Logout</button>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="card p-4">
+    <h4 class="mb-4 text-primary">Completed Maintenance Tasks</h4>
+   <table class="table table-bordered table-hover" id="completedTasksTable">
+  <thead class="table-light">
+    <tr>
+      <th>Date</th>
+      <th>Employee</th>
+      <th>Task</th>
+      <th>Description</th>
+      <th>Status</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody id="completedTasksBody"></tbody>
+</table>
+
+<script>
+function loadCompletedTasks() {
+  const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+  const completedTasks = tasks.filter(t => t.status === "Completed" || t.status === "Done");
+  const tbody = document.getElementById("completedTasksBody");
+  tbody.innerHTML = "";
+
+  if(completedTasks.length === 0){
+    tbody.innerHTML = `<tr><td colspan="6" class="text-center">No completed tasks yet.</td></tr>`;
+    return;
+  }
+
+  completedTasks.forEach(t => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${t.date}</td>
+        <td>${t.username}</td>
+        <td>${t.task}</td>
+        <td>${t.description}</td>
+        <td><span class="badge bg-success">Completed</span></td>
+        <td><button class="btn btn-sm btn-danger" onclick="removeTask(${t.id})">Remove</button></td>
+      </tr>
+    `;
+  });
+}
+
+function removeTask(taskId) {
+  let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+  tasks = tasks.filter(t => t.id !== taskId);
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+  loadCompletedTasks();
+  alert("Task removed successfully!");
+}
+
+// Update table whenever localStorage changes
+window.addEventListener('storage', loadCompletedTasks);
+
+// Initial load
+loadCompletedTasks();
+</script>
+
+
+

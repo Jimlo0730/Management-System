@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SuperAdmin Dashboard | Cold Storage System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: #f8f9fa;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .card {
+      border-radius: 1rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-dark bg-dark">
+    <div class="container-fluid">
+      <span class="navbar-brand">Create User</span>
+      <button class="btn btn-outline-light" onclick="window.location.href='superadmin_dashboard.html'">Back</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h2 class="mb-4 text-primary">SuperAdmin Dashboard</h2>
+
+    <!-- Account Creation Form -->
+    <div class="card mb-4 p-4">
+      <h4>Create New Account</h4>
+      <form id="accountForm">
+        <div class="mb-3">
+          <label class="form-label">Username</label>
+          <input id="username" type="text" class="form-control" required placeholder="Enter username" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Password</label>
+          <input id="password" type="password" class="form-control" required placeholder="Enter password" />
+        </div>
+        <div class="mb-4">
+          <label class="form-label">Account Role</label>
+          <select id="role" class="form-select" required>
+            <option value="">-- Select Role --</option>
+            <option value="admin">Admin</option>
+            <option value="user">User</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Create Account</button>
+      </form>
+    </div>
+
+    <!-- Accounts Table -->
+    <div class="card p-4">
+      <h4>Existing Accounts</h4>
+      <table class="table table-bordered mt-3">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Base Role</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="accountsTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // --- Ensure SuperAdmin account exists ---
+    const superAdminAccount = { username: "super1", password: "pass123", baseRole: "superadmin", permissions: [] };
+    let accounts = JSON.parse(localStorage.getItem("accounts")) || [];
+    if (!accounts.some(acc => acc.username === superAdminAccount.username)) {
+      accounts.push(superAdminAccount);
+      localStorage.setItem("accounts", JSON.stringify(accounts));
+    }
+
+    // --- Display accounts in table ---
+    function displayAccounts() {
+      let accounts = JSON.parse(localStorage.getItem("accounts")) || [];
+      const tableBody = document.getElementById("accountsTable");
+      tableBody.innerHTML = "";
+      accounts.forEach((acc, index) => {
+        const row = `
+          <tr>
+            <td>${acc.username}</td>
+            <td>${acc.baseRole}</td>
+            <td>
+              ${acc.baseRole !== "superadmin" ? `<button onclick="deleteAccount(${index})" class="btn btn-danger btn-sm">Delete</button>` : ""}
+            </td>
+          </tr>
+        `;
+        tableBody.innerHTML += row;
+      });
+    }
+
+    // --- Delete account ---
+    function deleteAccount(index) {
+      let accounts = JSON.parse(localStorage.getItem("accounts")) || [];
+      accounts.splice(index, 1);
+      localStorage.setItem("accounts", JSON.stringify(accounts));
+      displayAccounts();
+    }
+
+    // --- Handle account creation ---
+    document.getElementById("accountForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const role = document.getElementById("role").value;
+
+      let accounts = JSON.parse(localStorage.getItem("accounts")) || [];
+
+      // Prevent duplicate usernames
+      if (accounts.some(acc => acc.username === username)) {
+        alert("Username already exists!");
+        return;
+      }
+
+      // Add new account with permissions array
+      const newAccount = {
+        username: username,
+        password: password,
+        baseRole: role,
+        permissions: [] // always include this
+      };
+
+      accounts.push(newAccount);
+      localStorage.setItem("accounts", JSON.stringify(accounts));
+      alert(`Account for "${username}" created successfully!`);
+      document.getElementById("accountForm").reset();
+      displayAccounts();
+    });
+
+    // Initial load
+    displayAccounts();
+  </script>
+</body>
+</html>

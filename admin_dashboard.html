@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <style>
+    body {
+      background: linear-gradient(to right, #e8f5e9, #f0f9ff);
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .navbar-brand {
+      font-weight: bold;
+      font-size: 1.25rem;
+    }
+    h2 {
+      font-weight: bold;
+      margin: 30px 0;
+      text-align: center;
+      color: #007bff;
+    }
+    .dashboard-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .dashboard-card {
+      background: #fff;
+      border-radius: 15px;
+      padding: 30px 20px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+    .dashboard-card:hover {
+      transform: translateY(-5px);
+    }
+    .dashboard-card i {
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+      display: block;
+    }
+    .dashboard-card span {
+      font-weight: 500;
+      font-size: 1.1rem;
+      display: block;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
+  <span class="navbar-brand">Admin Dashboard</span>
+  <div class="ms-auto d-flex gap-2">
+    <button class="btn btn-outline-light" onclick="history.back()">Back</button>
+    <button class="btn btn-outline-light" onclick="window.location.href='login_form.html'">Logout</button>
+  </div>
+</nav>
+
+<h2>System Management Panel</h2>
+
+<div class="dashboard-container" id="adminModules"></div>
+
+<script>
+const adminModules = {
+  time_in_out: { href: "admin_time_in_out.html", icon: "bi-clock-history text-info", label: "Time In/Out" },
+  pending_approvals: { href: "admin_pending_approvals.html", icon: "bi-hourglass-split text-warning", label: "Pending Approvals" },
+  maintenance_reminders: { href: "admin_maintenance_reminders.html", icon: "bi-bell text-danger", label: "Maintenance Reminders" },
+  export_logs: { href: "admin_export_logs.html", icon: "bi-file-earmark-arrow-down text-secondary", label: "Export Logs" },
+  customer_reports: { href: "admin_customer_evaluations.html", icon: "bi-chat-square-quote text-success", label: "Customer Evaluations" },
+  notifications: { href: "admin_notifications.html", icon: "bi-bell-fill text-info", label: "Notifications" },
+  assign_task: { href: "admin_assign_task.html", icon: "bi-person-check text-primary", label: "Assign Task" },
+  generate_reports: { href: "admin_generate_reports.html", icon: "bi-bar-chart-line text-success", label: "Generate Reports" }
+};
+
+window.onload = function() {
+  let loggedUser = JSON.parse(localStorage.getItem("loggedInUser"));
+  if (!loggedUser) {
+    window.location.href = "login_form.html";
+    return;
+  }
+  const container = document.getElementById("adminModules");
+  container.innerHTML = "";
+  (loggedUser.permissions || []).forEach(p => {
+    if (adminModules[p]) {
+      let m = adminModules[p];
+      container.innerHTML += `
+        <a href="${m.href}" class="text-decoration-none text-dark">
+          <div class="dashboard-card">
+            <i class="bi ${m.icon}"></i>
+            <span>${m.label}</span>
+          </div>
+        </a>
+      `;
+    }
+  });
+}
+</script>
+
+</body>
+</html>
